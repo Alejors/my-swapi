@@ -157,10 +157,29 @@ def list_and_create_planets():
         planet.population = incoming_data['population']
         planet.description = incoming_data['description']
 
-        db.session.add(planet)
-        db.session.commit()
+        planet.save()
 
         return 'Planet registered', 200
+
+@app.route('/planets/<int:id>', methods=['PUT'])
+def update_planet(id):
+    updatingplanet = Planet.query.get(id)
+    
+    updatingplanet.name = updatingplanet.name if request.json.get('name') is None else request.json.get('name')
+    updatingplanet.picture = updatingplanet.picture if request.json.get('picture') is None else request.json.get('picture')
+    updatingplanet.rotation_period = updatingplanet.rotation_period if request.json.get('rotation_period') is None else request.json.get('rotation_period')
+    updatingplanet.orbital_period = updatingplanet.orbital_period if request.json.get('orbital_period') is None else request.json.get('orbital_period')
+    updatingplanet.diameter = updatingplanet.diameter if request.json.get('diameter') is None else request.json.get('diameter')
+    updatingplanet.climate = updatingplanet.climate if request.json.get('climate') is None else request.json.get('climate')
+    updatingplanet.gravity = updatingplanet.gravity if request.json.get('gravity') is None else request.json.get('gravity')
+    updatingplanet.terrain = updatingplanet.terrain if request.json.get('terrain') is None else request.json.get('terrain')
+    updatingplanet.surface_water = updatingplanet.surface_water if request.json.get('surface_water') is None else request.json.get('surface_water')
+    updatingplanet.population = updatingplanet.population if request.json.get('population') is None else request.json.get('population')
+    updatingplanet.description = updatingplanet.description if request.json.get('description') is None else request.json.get('description')
+
+    updatingplanet.update()
+
+    return jsonify({"msg": "Information updated"})
 
 @app.route('/vehicles', methods=['GET', 'POST'])
 def list_and_create_vehicles():
@@ -169,7 +188,6 @@ def list_and_create_vehicles():
         vehicles = list(map(lambda vehicle: vehicle.serialize(), vehicles))
 
         return jsonify(vehicles), 200
-
 
     if request.method == 'POST':
         incoming_data = request.get_json()
@@ -189,10 +207,31 @@ def list_and_create_vehicles():
         vehicle.vehicle_class = incoming_data['vehicle_class']
         vehicle.description = incoming_data['description']
 
-        db.session.add(vehicle)
-        db.session.commit()
+        vehicle.save()
 
         return 'Vehicle registered', 200
+
+@app.route('/vehicles/<int:id>', methods=['PUT'])
+def update_vehicle(id):
+    updatingvehicle = Vehicle.query.get(id)
+
+    updatingvehicle.name = updatingvehicle.name if request.json.get('name') is None else request.json.get('name')
+    updatingvehicle.picture = updatingvehicle.picture if request.json.get('picture') is None else request.json.get('picture')
+    updatingvehicle.model = updatingvehicle.model if request.json.get('model') is None else request.json.get('model')
+    updatingvehicle.manufacturer = updatingvehicle.manufacturer if request.json.get('manufacturer') is None else request.json.get('manufacturer')
+    updatingvehicle.cost_in_credits = updatingvehicle.cost_in_credits if request.json.get('cost_in_credits') is None else request.json.get('cost_in_credits')
+    updatingvehicle.length = updatingvehicle.length if request.json.get('length') is None else request.json.get('length')
+    updatingvehicle.max_atmosphering_speed = updatingvehicle.max_atmosphering_speed if request.json.get('max_atmosphering_speed') is None else request.json.get('max_atmosphering_speed')
+    updatingvehicle.crew = updatingvehicle.crew if request.json.get('crew') is None else request.json.get('crew')
+    updatingvehicle.passengers = updatingvehicle.passengers if request.json.get('passengers') is None else request.json.get('passengers')
+    updatingvehicle.cargo_capacity = updatingvehicle.cargo_capacity if request.json.get('cargo_capacity') is None else request.json.get('cargo_capacity')
+    updatingvehicle.consumables = updatingvehicle.consumables if request.json.get('consumables') is None else request.json.get('consumables')
+    updatingvehicle.vehicle_class = updatingvehicle.vehicle_class if request.json.get('vehicle_class') is None else request.json.get('vehicle_class')
+    updatingvehicle.description = updatingvehicle.description if request.json.get('description') is None else request.json.get('description')
+
+    updatingvehicle.update()
+
+    return jsonify({"msg": "Information updated"})
 
 if __name__ == "__main__":
     app.run()

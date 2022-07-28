@@ -1,10 +1,134 @@
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    is_active = db.Column(db.Boolean(), default=True)
+    profile = db.relationship("Profile", backref="user", uselist=False)
+
+    def serialize(self):
+        return{
+            'id': self.id,
+            'username': self.username,
+            'is active': self.is_active
+        }
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+class Profile(db.Model):
+    __tablename__ = 'profiles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), default="unknown")
+    lastname = db.Column(db.String(100), default="unknown")
+    favorite_characters = db.relationship("Favorite_character", backref="profile")
+    favorite_planets = db.relationship("Favorite_planet", backref="profile")
+    favorite_vehicles = db.relationship("Favorite_vehicle", backref="profile")
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+            "user id": self.user_id,
+            "username": self.user.username,
+            "active": self.user.is_active
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+class Favorite_character(db.Model):
+    __tablename__ = 'favorite_characters'
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
+    character_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+
+    def serialize(self):
+        return{
+            "user": self.user_id,
+            "character": self.character_id
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+class Favorite_planet(db.Model):
+    __tablename__ = 'favorite_planets'
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
+    planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
+
+    def serialize(self):
+        return{
+            "user": self.user_id,
+            "planet": self.planet_id
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+class Favorite_vehicle(db.Model):
+    __tablename__ = 'favorite_vehicles'
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
+
+    def serialize(self):
+        return{
+            "user": self.user_id,
+            "vehicle": self.vehicle_id
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class People(db.Model):
     __tablename__ = 'people'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text)
     picture = db.Column(db.String(250), default="https://dummyimage.com/300X200/dbdbdb/000")
     height = db.Column(db.Integer)
     mass = db.Column(db.Integer)
@@ -31,10 +155,22 @@ class People(db.Model):
             # "homeplanet": "unknown" if self.planet.name is None else self.planet.name
         }
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class Planet(db.Model):
     __tablename__ = 'planets'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique = True, default="unknown")
+    description = db.Column(db.Text)
     picture = db.Column(db.String(250), default="https://dummyimage.com/300X200/dbdbdb/000")
     rotation_period = db.Column(db.Integer)
     orbital_period = db.Column(db.Integer)
@@ -45,7 +181,6 @@ class Planet(db.Model):
     surface_water = db.Column(db.Integer)
     population = db.Column(db.Integer)
     characters_born = db.relationship('People', backref='planet')
-    ##residents = db.Column(db.String(100), default="unknown")
 
     def serialize(self):
         return {
@@ -62,10 +197,23 @@ class Planet(db.Model):
             "picture": self.picture
         }
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
 class Vehicle(db.Model):
     __tablename__ = 'vehicles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
+    description = db.Column(db.Text)
     picture = db.Column(db.String(250), default="https://dummyimage.com/300X200/dbdbdb/000")
     model = db.Column(db.String(100), unique=True)
     manufacturer = db.Column(db.String(100))
@@ -77,7 +225,6 @@ class Vehicle(db.Model):
     cargo_capacity = db.Column(db.Integer)
     consumables = db.Column(db.String(100))
     vehicle_class = db.Column(db.String(100))
-    ##pilots = db.Column(db.String(100))
 
     def serialize(self):
         return {
@@ -95,3 +242,14 @@ class Vehicle(db.Model):
             "consumables": self.consumables,
             "vehicle class": self.vehicle_class
         }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

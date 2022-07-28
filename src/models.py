@@ -32,9 +32,9 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), default="unknown")
     lastname = db.Column(db.String(100), default="unknown")
-    favorite_characters = db.relationship("Favorite_character", backref="profile")
-    favorite_planets = db.relationship("Favorite_planet", backref="profile")
-    favorite_vehicles = db.relationship("Favorite_vehicle", backref="profile")
+    fav_char = db.relationship("People", secondary="favorite_characters")
+    fav_plan = db.relationship("Planet", secondary="favorite_planets")
+    fav_veh = db.relationship("Vehicle", secondary="favorite_vehicles")
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def serialize(self):
@@ -65,7 +65,7 @@ class Favorite_character(db.Model):
 
     def serialize(self):
         return{
-            "user": self.user_id,
+            "user": self.profile_id,
             "character": self.character_id
         }
 
@@ -152,7 +152,7 @@ class People(db.Model):
             "birth year": self.birth_year,
             "gender": self.gender,
             "picture": self.picture,
-            # "homeplanet": "unknown" if self.planet.name is None else self.planet.name
+            "homeplanet": "unknown" if self.planet.name is None else self.planet.name
         }
 
     def save(self):
@@ -181,6 +181,7 @@ class Planet(db.Model):
     surface_water = db.Column(db.Integer)
     population = db.Column(db.Integer)
     characters_born = db.relationship('People', backref='planet')
+    users_liked = db.relationship("Profile", secondary="favorite_planets")
 
     def serialize(self):
         return {
@@ -225,6 +226,7 @@ class Vehicle(db.Model):
     cargo_capacity = db.Column(db.Integer)
     consumables = db.Column(db.String(100))
     vehicle_class = db.Column(db.String(100))
+    users_liked = db.relationship("Profile", secondary="favorite_vehicles")
 
     def serialize(self):
         return {

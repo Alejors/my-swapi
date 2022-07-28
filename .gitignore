@@ -253,4 +253,4 @@ cython_debug/
 
 .venv/
 migrations/
-my_swapi.db
+src/my_swapi.db

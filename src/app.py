@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
-from models import db, People, Planet, Vehicle, User, Profile
+from models import db, People, Planet, Vehicle, User, Profile, Favorite_character
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 
@@ -232,6 +232,20 @@ def update_vehicle(id):
     updatingvehicle.update()
 
     return jsonify({"msg": "Information updated"})
+
+@app.route('/favorite', methods=['POST'])
+@jwt_required()
+def add_favorite():
+    current_user = get_jwt_identity()
+    usersProfile = Profile.query.get(current_user)
+
+    favorite = Favorite_character()
+    favorite.character_id = request.json.get('character_id')
+    favorite.profile_id = usersProfile.id
+    
+    favorite.save()
+
+    return jsonify(favorite.serialize())
 
 if __name__ == "__main__":
     app.run()

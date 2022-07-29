@@ -95,15 +95,14 @@ def users():
 @app.route('/users/favorites', methods=['GET'])
 @jwt_required()
 def user_favorites():
-    user = get_jwt_identity()
-    #users_favorite_chars = 
-    #users_favorite_plans = 
+    current_user = get_jwt_identity()
+    usersProfile = Profile.query.get(current_user)
     data = {
-        "favorite characters": resultados_de_characters,
-        "favorite planets": resultado_de_planets
+        "favorite characters": usersProfile.get_fav_chars(),
+        "favorite planets": usersProfile.get_fav_plans()
     }
-    
-    return jsonify(users_list),200
+
+    return jsonify({"msg":"Success", "data": data}),200
 
 @app.route('/characters', methods=['GET', 'POST'])
 def list_and_create_people():

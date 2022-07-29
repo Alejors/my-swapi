@@ -44,7 +44,7 @@ def login():
     if not thisUser: return jsonify({"msg": "Failed: username/password incorrect"}), 401
     if not check_password_hash(thisUser.password, incomingPassword): return jsonify({"msg": "Failed: username/password incorrect"}), 401
 
-    expire = datetime.timedelta(hours=3)
+    expire = datetime.timedelta(hours=1)
     access_token = create_access_token(identity=thisUser.id, expires_delta=expire)
 
     data = {
@@ -77,13 +77,25 @@ def register():
     else:
         return jsonify({"status": "Incomplete", "message": "Registration failed, try again."}), 400
 
-@app.route('/profile', methods=['GET'])
+@app.route('/profile', methods=['GET', 'PUT'])
 @jwt_required()
-def profile():
-    id = get_jwt_identity()
-    current_user = Profile.query.get(id)
+def profile_consult_or_update():
+    if request.method == 'GET':
+        id = get_jwt_identity()
+        current_user = Profile.query.get(id)
 
-    return jsonify(current_user.serialize()), 200
+        return jsonify(current_user.serialize()), 200
+
+    if request.method == 'PUT':
+        id = get_jwt_identity()
+        current_user = Profile.query.get(id)
+        
+        current_user.name = current_user.name if request.json.get('name') is None else request.json.get('name')
+        current_user.lastname = current_user.lastname if request.json.get('lastname') is None else request.json.get('lastname')
+        
+        current_user.update()
+
+        return jsonify({"msg": "Information updated"}), 200
 
 @app.route('/users', methods=['GET'])
 def users():

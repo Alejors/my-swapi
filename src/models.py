@@ -118,7 +118,7 @@ class People(db.Model):
             "birth year": self.birth_year,
             "gender": self.gender,
             "picture": self.picture,
-            "homeplanet": "unknown" if self.planet.name is None else self.planet.name
+            "homeplanet": "unknown" if self.planet is None else self.planet.name
         }
 
     def save(self):

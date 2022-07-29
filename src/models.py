@@ -32,10 +32,15 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), default="unknown")
     lastname = db.Column(db.String(100), default="unknown")
-    fav_char = db.relationship("People", secondary="favorite_characters")
+    fav_char = db.relationship('People', secondary="favorite_characters")
     fav_plan = db.relationship("Planet", secondary="favorite_planets")
-    fav_veh = db.relationship("Vehicle", secondary="favorite_vehicles")
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    def get_fav_chars(self):
+        return (list(map(lambda char: char.name, self.fav_char)))
+
+    def get_fav_plans(self):
+        return (list(map(lambda plan: plan.name, self.fav_plan)))
 
     def serialize(self):
         return {
@@ -44,7 +49,9 @@ class Profile(db.Model):
             "lastname": self.lastname,
             "user id": self.user_id,
             "username": self.user.username,
-            "active": self.user.is_active
+            "active": self.user.is_active,
+            "liked characters": self.get_fav_chars(),
+            "liked planets": self.get_fav_plans()
         }
 
     def save(self):
@@ -58,68 +65,28 @@ class Profile(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-class Favorite_character(db.Model):
+class Favorite_characters(db.Model):
     __tablename__ = 'favorite_characters'
-    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
-    character_id = db.Column(db.Integer, db.ForeignKey('people.id'))
-
-    def serialize(self):
-        return{
-            "user": self.profile_id,
-            "character": self.character_id
-        }
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True) 
+    character_id = db.Column(db.Integer, db.ForeignKey('people.id'), primary_key=True)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
+    
     def delete(self):
         db.session.delete(self)
         db.session.commit()
 
-class Favorite_planet(db.Model):
+class Favorite_planets(db.Model):
     __tablename__ = 'favorite_planets'
-    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
-    planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
-
-    def serialize(self):
-        return{
-            "user": self.user_id,
-            "planet": self.planet_id
-        }
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True) 
+    planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'), primary_key=True)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-class Favorite_vehicle(db.Model):
-    __tablename__ = 'favorite_vehicles'
-    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
-    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
-
-    def serialize(self):
-        return{
-            "user": self.user_id,
-            "vehicle": self.vehicle_id
-        }
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
+    
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -138,7 +105,6 @@ class People(db.Model):
     birth_year = db.Column(db.String(100))
     gender = db.Column(db.String(100))
     planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'), default="")
-    ##vehicles = db.Column(db.String(100))
 
     def serialize(self):
         return {
@@ -181,7 +147,6 @@ class Planet(db.Model):
     surface_water = db.Column(db.Integer)
     population = db.Column(db.Integer)
     characters_born = db.relationship('People', backref='planet')
-    users_liked = db.relationship("Profile", secondary="favorite_planets")
 
     def serialize(self):
         return {
@@ -226,7 +191,7 @@ class Vehicle(db.Model):
     cargo_capacity = db.Column(db.Integer)
     consumables = db.Column(db.String(100))
     vehicle_class = db.Column(db.String(100))
-    users_liked = db.relationship("Profile", secondary="favorite_vehicles")
+    # users_liked = db.relationship("Profile", secondary="favorite_vehicles")
 
     def serialize(self):
         return {

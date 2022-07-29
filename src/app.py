@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
-from models import db, People, Planet, Vehicle, User, Profile, Favorite_character
+from models import db, People, Planet, Vehicle, User, Profile, Favorite_characters, Favorite_planets
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 
@@ -81,9 +81,29 @@ def register():
 @jwt_required()
 def profile():
     id = get_jwt_identity()
-    current_user = User.query.get(id)
+    current_user = Profile.query.get(id)
 
     return jsonify(current_user.serialize()), 200
+
+@app.route('/users', methods=['GET'])
+def users():
+    users = User.query.all()
+    users_list = list(map(lambda user: user.serialize(), users))
+
+    return jsonify(users_list),200
+
+@app.route('/users/favorites', methods=['GET'])
+@jwt_required()
+def user_favorites():
+    user = get_jwt_identity()
+    #users_favorite_chars = 
+    #users_favorite_plans = 
+    data = {
+        "favorite characters": resultados_de_characters,
+        "favorite planets": resultado_de_planets
+    }
+    
+    return jsonify(users_list),200
 
 @app.route('/characters', methods=['GET', 'POST'])
 def list_and_create_people():
@@ -111,6 +131,13 @@ def list_and_create_people():
         people.save()
 
         return 'Character registered'
+
+@app.route('/characters/<int:id>', methods=['GET'])
+def list_single_character(id):
+    
+    character = People.query.get(id)
+
+    return jsonify(character.serialize()), 200
 
 @app.route('/characters/<int:id>', methods=['PUT'])
 def update_character(id):
@@ -160,6 +187,13 @@ def list_and_create_planets():
         planet.save()
 
         return 'Planet registered', 200
+
+@app.route('/planets/<int:id>', methods=['GET'])
+def list_single_planet(id):
+    
+    planet = Planet.query.get(id)
+
+    return jsonify(planet.serialize()), 200
 
 @app.route('/planets/<int:id>', methods=['PUT'])
 def update_planet(id):
@@ -233,19 +267,51 @@ def update_vehicle(id):
 
     return jsonify({"msg": "Information updated"})
 
-@app.route('/favorite', methods=['POST'])
+@app.route('/favorite/people/<int:id>', methods=['POST', 'DELETE'])
 @jwt_required()
-def add_favorite():
-    current_user = get_jwt_identity()
-    usersProfile = Profile.query.get(current_user)
+def add_or_delete_favorite_character(id):
+    if request.method == 'POST':
+        current_user = get_jwt_identity()
+        usersProfile = Profile.query.get(current_user)
 
-    favorite = Favorite_character()
-    favorite.character_id = request.json.get('character_id')
-    favorite.profile_id = usersProfile.id
+        favorite = Favorite_characters()
+        favorite.character_id = id
+        favorite.profile_id = usersProfile.id
+        favorite.save()
+
+        return jsonify({"msg":"insertion ok"})
     
-    favorite.save()
+    if request.method == 'DELETE':
+        current_user = get_jwt_identity()
+        usersProfile = Profile.query.get(current_user)
 
-    return jsonify(favorite.serialize())
+        favorites = Favorite_characters.query.filter_by(profile_id = usersProfile.id, character_id = id).first()
+        favorites.delete()
+
+        return "favorite deleted"
+
+@app.route('/favorite/planets/<int:id>', methods=['POST', 'DELETE'])
+@jwt_required()
+def add_or_delete_favorite_planet(id):
+    if request.method == 'POST':
+        current_user = get_jwt_identity()
+        usersProfile = Profile.query.get(current_user)
+
+        favorite = Favorite_planets()
+        favorite.planet_id = id
+        favorite.profile_id = usersProfile.id
+        favorite.save()
+
+        return jsonify({"msg":"insertion ok"})
+    
+    if request.method == 'DELETE':
+        current_user = get_jwt_identity()
+        usersProfile = Profile.query.get(current_user)
+
+        favorites = Favorite_planets.query.filter_by(profile_id = usersProfile.id, planet_id = id).first()
+        favorites.delete()
+
+        return "favorite deleted"
 
 if __name__ == "__main__":
     app.run()

@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
-from .models import db, People, Planet, Vehicle, User, Profile, Favorite_characters, Favorite_planets
+from models import db, People, Planet, Vehicle, User, Profile, Favorite_characters, Favorite_planets
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 

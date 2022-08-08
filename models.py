@@ -110,6 +110,7 @@ class People(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "description": self.description,
             "height": self.height,
             "mass": self.mass,
             "hair color": self.hair_color,
@@ -152,6 +153,7 @@ class Planet(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "description": self.description,
             "rotation period": self.rotation_period,
             "orbital_period": self.orbital_period,
             "diameter": self.diameter,
@@ -197,6 +199,7 @@ class Vehicle(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "description": self.description,
             "picture": self.picture,
             "model": self.model,
             "manufacturer": self.manufacturer,
